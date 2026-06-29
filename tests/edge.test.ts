@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
 import { parsePlan } from "../src/lib/parse.js";
 import { scoreChanges } from "../src/lib/score.js";
 import { summarize } from "../src/lib/summarize.js";
@@ -20,13 +21,13 @@ describe("unknown actions fail safe (not silently zero)", () => {
   );
 
   it("normalizes an unrecognized action to 'unknown'", () => {
-    expect(changes[0]?.action).toBe("unknown");
+    assert.equal(changes[0]?.action, "unknown");
   });
 
   it("scores it as risky (weight 40), never 0", () => {
     const f = scoreChanges(changes)[0];
-    expect(f?.score).toBe(40);
-    expect(f?.risk).not.toBe("low");
+    assert.equal(f?.score, 40);
+    assert.notEqual(f?.risk, "low");
   });
 });
 
@@ -42,7 +43,7 @@ describe("['no-op'] still normalizes to no-op", () => {
         },
       ]),
     );
-    expect(changes[0]?.action).toBe("no-op");
+    assert.equal(changes[0]?.action, "no-op");
   });
 });
 
@@ -66,8 +67,8 @@ describe("elevated risk without a policy rule is still reported (no header/body 
 
   it("surfaces a medium stateless replace that matches no rule", () => {
     const report = summarize(findings);
-    expect(report.json.counts.medium).toBe(1);
-    expect(report.json.findings).toHaveLength(1); // shown, not hidden in the quiet bucket
-    expect(report.text).toContain("[MED ]");
+    assert.equal(report.json.counts.medium, 1);
+    assert.equal(report.json.findings.length, 1); // shown, not hidden in the quiet bucket
+    assert.ok(report.text.includes("[MED ]"));
   });
 });

@@ -77,8 +77,9 @@ or regenerate with `npm run demo`.
 
 ## Stack
 
-TypeScript (strict, ESM), Node ≥ 20. Tests: vitest. Lint: eslint (flat). Boundary
-validation: zod. One runtime dependency. No network, no credentials.
+TypeScript (strict, ESM), Node ≥ 20. Tests: Node's built-in `node:test` (no test
+framework). Lint: eslint (flat). Boundary validation: zod — the only runtime
+dependency. No network, no credentials. `npm ci` installs clean on any platform.
 
 ---
 

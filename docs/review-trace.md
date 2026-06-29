@@ -28,6 +28,19 @@ and how each item was resolved — the audit trail the course asks for.
 - `json.total` (all changes) vs `json.findings` (actionable only) naming — kept; the
   README and types explain the distinction.
 
-## After fixes
+## After the first (agent) review
 
-`npm run verify` → lint ✓ · typecheck ✓ · 26 tests ✓ · eval 35/35 over 7 cases ✓.
+`npm run verify` → lint ✓ · typecheck ✓ · tests ✓ · eval 35/35 over 7 cases ✓.
+
+## Second pass — independent external audit (against the assignment README)
+
+A third reviewer audited the submission as a whole. Findings and resolutions:
+
+| Sev | Finding | Resolution |
+|-----|---------|------------|
+| **P1 blocker** | `npm ci` failed on **Linux CI**: `@emnapi/core` / `@napi-rs/runtime` missing from the lockfile (vitest 4 pulled `rolldown` + `@napi-rs/wasm-runtime`, the npm cross-platform optional-deps bug). Passed locally on macOS, contradicting the green-gate claim. | Removed the entire vitest/vite/rolldown/esbuild test stack; migrated all tests to Node's built-in **`node:test`**. Regenerated `package-lock.json`. `npm ci` now installs clean on any platform; `rolldown`/`emnapi`/`vitest` entries: 0. |
+| **P2** | Very long Terraform addresses could swallow the reason — the line was truncated blindly at the end, dropping `— delete of stateful resource`. | `summarizeFinding` now truncates the **address in the middle** and always keeps label/score/reason. New test `preserves the reason for a very long address`. |
+| **P3** | Stateful heuristic (`type.includes()`) false-positives on lookalikes like `aws_s3_bucket_public_access_block`, `aws_iam_instance_profile`. | Added `STATEFUL_DENYLIST` checked before the patterns; documented in FR-RISK-01. New test `does not false-positive on lookalike stateless types`. |
+| **P3** | PR submission metadata (real name, video link, practices) not verifiable from the repo. | By design — the PR is opened after local validation; the filled template carries name + asciinema link + practices. Tracked as the final step. |
+
+After this pass: `npm ci` ✓ · lint ✓ · typecheck ✓ · **28 tests** ✓ · eval 35/35 ✓ · 0 vulnerabilities.

@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
 import { requiredTags, riskyDelete } from "../src/lib/rules/index.js";
 import type { ResourceChange } from "../src/lib/types.js";
 
@@ -13,37 +14,49 @@ const base: ResourceChange = {
 describe("requiredTags (FR-TAGS-01)", () => {
   it("flags a created resource missing a required tag", () => {
     const hit = requiredTags({ ...base, tags: { environment: "prod" } });
-    expect(hit?.id).toBe("missing-required-tags");
-    expect(hit?.weight).toBe(20);
-    expect(hit?.detail).toContain("owner");
+    assert.equal(hit?.id, "missing-required-tags");
+    assert.equal(hit?.weight, 20);
+    assert.ok(hit?.detail.includes("owner"));
   });
 
   it("passes when all required tags are present", () => {
-    expect(requiredTags(base)).toBeNull();
+    assert.equal(requiredTags(base), null);
   });
 
   it("does not apply to deletes (the resource is going away)", () => {
-    expect(requiredTags({ ...base, action: "delete", tags: {} })).toBeNull();
+    assert.equal(requiredTags({ ...base, action: "delete", tags: {} }), null);
   });
 });
 
 describe("riskyDelete (FR-RISK-01)", () => {
   it("flags a delete of a stateful resource", () => {
     const hit = riskyDelete({ ...base, type: "aws_db_instance", action: "delete" });
-    expect(hit?.id).toBe("risky-delete");
-    expect(hit?.weight).toBe(50);
+    assert.equal(hit?.id, "risky-delete");
+    assert.equal(hit?.weight, 50);
   });
 
   it("flags a replace of a stateful resource", () => {
     const hit = riskyDelete({ ...base, type: "aws_s3_bucket", action: "replace" });
-    expect(hit?.id).toBe("risky-delete");
+    assert.equal(hit?.id, "risky-delete");
   });
 
   it("ignores a create of a stateful resource type", () => {
-    expect(riskyDelete({ ...base, type: "aws_db_instance", action: "create" })).toBeNull();
+    assert.equal(riskyDelete({ ...base, type: "aws_db_instance", action: "create" }), null);
   });
 
   it("ignores a delete of a stateless resource", () => {
-    expect(riskyDelete({ ...base, type: "aws_iam_role", action: "delete" })).toBeNull();
+    assert.equal(riskyDelete({ ...base, type: "aws_iam_role", action: "delete" }), null);
+  });
+
+  it("does not false-positive on lookalike stateless types", () => {
+    // aws_s3_bucket_public_access_block and aws_iam_instance_profile are config, not state.
+    assert.equal(
+      riskyDelete({ ...base, type: "aws_s3_bucket_public_access_block", action: "delete" }),
+      null,
+    );
+    assert.equal(
+      riskyDelete({ ...base, type: "aws_iam_instance_profile", action: "delete" }),
+      null,
+    );
   });
 });

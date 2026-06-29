@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parsePlan } from "../src/lib/parse.js";
@@ -11,30 +12,30 @@ describe("parsePlan (FR-PARSE-01)", () => {
   const changes = parsePlan(fixture);
 
   it("extracts every resource change", () => {
-    expect(changes).toHaveLength(5);
-    expect(changes.map((c) => c.address)).toContain("aws_db_instance.main");
+    assert.equal(changes.length, 5);
+    assert.ok(changes.map((c) => c.address).includes("aws_db_instance.main"));
   });
 
   it("normalizes ['delete','create'] into a replace action", () => {
     const bucket = changes.find((c) => c.address === "aws_s3_bucket.assets");
-    expect(bucket?.action).toBe("replace");
+    assert.equal(bucket?.action, "replace");
   });
 
   it("reads tags from `before` for deletes and `after` otherwise", () => {
     const del = changes.find((c) => c.address === "aws_db_instance.main");
-    expect(del?.tags).toEqual({ owner: "team-data", environment: "prod" });
+    assert.deepEqual(del?.tags, { owner: "team-data", environment: "prod" });
     const create = changes.find((c) => c.address === "aws_instance.worker");
-    expect(create?.tags).toEqual({ environment: "staging" });
+    assert.deepEqual(create?.tags, { environment: "staging" });
   });
 
   it("treats a missing resource_changes as an empty plan", () => {
-    expect(parsePlan({})).toEqual([]);
+    assert.deepEqual(parsePlan({}), []);
   });
 });
 
 describe("parsePlan (FR-PARSE-02)", () => {
   it("throws a clear error on malformed input", () => {
-    expect(() => parsePlan({ resource_changes: [{ address: "a" }] })).toThrow(/plan/i);
-    expect(() => parsePlan("nope")).toThrow(/plan/i);
+    assert.throws(() => parsePlan({ resource_changes: [{ address: "a" }] }), /plan/i);
+    assert.throws(() => parsePlan("nope"), /plan/i);
   });
 });

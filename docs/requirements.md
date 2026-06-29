@@ -33,7 +33,9 @@ Status values: `proposed` · `accepted` · `shipped` · `dropped`.
   is missing one of the required tag keys (default: `owner`, `environment`). Replace
   is included because it re-creates the resource, so tags must be present.
 - **FR-RISK-01** (shipped): Flag any `delete` or `replace` action on a stateful
-  resource type (e.g. `*_database`, `*_bucket`, `*_disk`, `*_instance`).
+  resource type (e.g. `*_database`, `*_bucket`, `*_disk`, `*_instance`). A denylist
+  excludes config/attachment lookalikes that merely contain a stateful substring
+  (e.g. `aws_s3_bucket_public_access_block`, `aws_iam_instance_profile`).
 
 ### Scoring (the capability)
 

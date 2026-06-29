@@ -22,13 +22,31 @@ export interface Report {
   json: ReportJson;
 }
 
-/** One concise line per finding. Never calls a high-risk change "safe" (FR-OUT-02). */
+/** Truncate in the MIDDLE, keeping head and tail, so identifying ends survive. */
+function middleTruncate(s: string, max: number): string {
+  if (s.length <= max) return s;
+  if (max <= 1) return "…";
+  const head = Math.ceil((max - 1) / 2);
+  const tail = max - 1 - head;
+  return `${s.slice(0, head)}…${s.slice(s.length - tail)}`;
+}
+
+/**
+ * One concise line per finding. Never calls a high-risk change "safe" (FR-OUT-02),
+ * and never drops the reason: a long address is truncated in the middle, the
+ * label/score/reason are always kept intact.
+ */
 export function summarizeFinding(f: Finding): string {
   const detail =
     f.rules.length > 0
       ? f.rules.map((r) => r.detail).join("; ")
       : `${f.action} (no policy rule matched)`;
-  const line = `[${LABEL[f.risk]}] ${f.score} ${f.address} — ${detail}`;
+  const prefix = `[${LABEL[f.risk]}] ${f.score} `;
+  const suffix = ` — ${detail}`;
+  const budget = MAX_LINE - prefix.length - suffix.length;
+  const address = middleTruncate(f.address, Math.max(budget, 1));
+  const line = `${prefix}${address}${suffix}`;
+  // Final safety net for a pathologically long reason (tool-controlled, so rare).
   return line.length > MAX_LINE ? `${line.slice(0, MAX_LINE - 1)}…` : line;
 }
 

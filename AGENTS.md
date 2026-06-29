@@ -13,8 +13,10 @@ for *fwdays — Agentic Engineering: Greenfield*.
 ## Stack (Technical Constraints)
 
 - TypeScript (strict, `NodeNext`), Node ≥ 20, ESM only.
-- Runtime: `tsx` for dev, `tsc` for build. Tests: `vitest`. Lint: `eslint` (flat).
-- Boundary validation: `zod`. No other runtime deps.
+- Runtime: `tsx` for dev, `tsc` for build. Tests: **`node:test`** (built-in, no test
+  framework). Lint: `eslint` (flat).
+- Boundary validation: `zod` is the only runtime dependency. Keep the dependency tree
+  tiny so `npm ci` is fast and lockfiles stay cross-platform clean.
 
 ## Architecture rules
 
