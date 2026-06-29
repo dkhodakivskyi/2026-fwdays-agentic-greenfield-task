@@ -70,8 +70,10 @@ See [DESIGN.md](DESIGN.md) and [docs/adr/0001-risk-score-model.md](docs/adr/0001
 
 ## Demo
 
-`docs/demo.cast` — recorded with [asciinema](https://asciinema.org). Replay locally
-with `asciinema play docs/demo.cast`, or regenerate with `npm run demo`.
+▶ **[asciinema.org/a/htK5ak4XL8me0pGj](https://asciinema.org/a/htK5ak4XL8me0pGj)**
+
+Also committed as `docs/demo.cast` — replay locally with `asciinema play docs/demo.cast`,
+or regenerate with `npm run demo`.
 
 ## Stack
 
