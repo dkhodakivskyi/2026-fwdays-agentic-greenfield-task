@@ -33,10 +33,10 @@ cmd "tf-guard tests/fixtures/plan-mixed.json --json | head -18"
 npx tsx src/cli.ts tests/fixtures/plan-mixed.json --json | head -18
 sleep 1.4
 
-banner "5. Clean CI install works (npm ci, no lockfile drift)"
-cmd "npm ci  # (already validated; tree: zod runtime + tsx/eslint/tsc dev)"
-printf "found 0 vulnerabilities\n"
-sleep 1.2
+banner "5. The same gate runs in CI on every push/PR — for real"
+cmd "grep -nE 'npm (ci|run)|exit 1' .github/workflows/ci.yml"
+grep -nE 'npm (ci|run)|exit 1' .github/workflows/ci.yml
+sleep 1.4
 
 banner "Context lives in the repo, not the chat"
 cmd "ls — rules · requirements · ADR · specs · skill · review trace"
